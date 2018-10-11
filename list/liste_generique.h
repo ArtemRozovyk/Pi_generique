@@ -23,6 +23,5 @@ void supprimer_liste_fin(lst l);
 void detruire_liste(lst* l);
 void afficher_liste(lst l);
 void * supprimer_en_I(int i, lst * l);
-void* rechercher_max_liste(lst l,int(*_comparer)(void* _val1, void* _val2));
-void* rechercher_min_liste(lst l,int(*_comparer)(void* _val1, void* _val2));
+
 #endif //UNTITLED_LISTE_GENERIQUE_H

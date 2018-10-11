@@ -1,6 +1,6 @@
 #include "arbre_g.h"
 
-
+//creer un arbre vide
 arb_gen creer_arbre(void* val, lst ens, float (*poids)(void *,lst ens), arb_gen (*grouper)(void *,void*), int (*comparer)(void *,void *), void(*copier)(void*, void**), void(*detruire)(void**), void(*afficher)(void*)){
 //creer un nouveau arbre à partir de 0;
 	arb_gen a=(arb_gen) malloc (sizeof(struct arbre_gen));
@@ -17,11 +17,14 @@ arb_gen creer_arbre(void* val, lst ens, float (*poids)(void *,lst ens), arb_gen 
 	return a; 
 }
 
-
+//creer un arbre qui herite les fonctions d'un autre arbre
 arb_gen creer_arbre1(void* val, lst ens, arb_gen pere){
 	return (creer_arbre(val,ens,pere->poids,pere->grouper,pere->comparer,pere->copier,pere->detruire,pere->afficher));
 }
 
+//copier les valeurs d'un arbre 
+//(vu que &copier est un simple passage d'adresse 
+// ce qui permet d'utiliser la fille)
 arb_gen creer_arbre2(arb_gen p){
 	//creer arbre a partir d'un arbre
 	arb_gen a=(arb_gen) malloc (sizeof(struct arbre_gen));
@@ -39,7 +42,10 @@ arb_gen creer_arbre2(arb_gen p){
 	
 	
 }
-
+//ajouter un noeud dans un arbre,
+//en tenant compte du fait que nous travaillons 
+//avec les arbres binaires complets 
+//la file est utilisé pour avoir le bon ordre
 void ajouter_noeud (arb_gen * ajout, arb_gen a){
 	lst queue=creer_liste(a->copier,a->detruire,a->afficher);
 	ajouter_noeud_aux(ajout,a,queue);
@@ -67,7 +73,7 @@ void ajouter_noeud_aux(arb_gen * ajout, arb_gen a, lst queue){
 	}
 	return;
 }
-
+//afficher le contenu d'un arbre
 void parcourir_arbre(arb_gen a, void(*afficher)(void*)){
 	lst queue=creer_liste(a->copier,a->detruire,afficher);
 	parcourir_arbre_aux(a,queue,afficher);
@@ -84,7 +90,8 @@ void parcourir_arbre_aux(arb_gen a,lst queue, void(*afficher)(void*)){
 		parcourir_arbre_aux(desc,queue,afficher);
 	}
 }
-
+//analogique à ajouter, supprime le noeud ajouté 
+//le plus récemment
 void supprimer_nd_arbre(arb_gen a){
 	lst queue=creer_liste(a->copier,a->detruire,a->afficher);
 	arb_gen as=(arb_gen)malloc(sizeof(struct arbre_gen));
@@ -115,7 +122,7 @@ void supprimer_nd_aux2(arb_gen a, arb_gen as){
 	supprimer_nd_aux2(a->nd,as);
 }
 
-
+//libere recursivement la memoire d'un arbre;
 void detruire_arbre(arb_gen * d){
 	if((*d)==NULL)return;
 		detruire_arbre(&(*d)->nd);

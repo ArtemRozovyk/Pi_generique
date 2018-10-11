@@ -7,6 +7,8 @@
 #include "noeud_generique.h"
 #include "liste_generique.h"
 
+
+//créer une liste vide
 lst creer_liste(void(*_copier)(void*, void**), void(*_detruire)(void**), void(*_afficher)(void*)) {
     lst l = (lst)malloc(sizeof(struct liste));
     l->tete = NULL;
@@ -48,6 +50,7 @@ void detruire_liste(lst* l) {
     free(*l);
     (*l)=NULL;
 }
+
 void afficher_liste(lst l) {
 	if(l->taille)
 	    afficher_tout(l->tete,l->afficher);
@@ -55,7 +58,7 @@ void afficher_liste(lst l) {
 		printf("La liste est vide.\n");
 }
 
-
+//supprimer un element en position specifié en paramètre 
 void * supprimer_en_I(int i,lst *l){
 	nd *n=&(*l)->tete;
 	void * val ;
@@ -95,8 +98,7 @@ void * supprimer_en_I(int i,lst *l){
 }
 
 
-
-
+//retourner un element par position
 void * get_en_i(int i, nd n){
 	nd tmp = n;
 	while(i--){
@@ -106,29 +108,7 @@ void * get_en_i(int i, nd n){
 
 }
 
-void* rechercher_max_liste(lst l,int(*_comparer)(void* _val1, void* _val2)) {
-    nd tmp = l->tete;
-    void *max = tmp->val;
-    for (int i = 1; i < l->taille; i++) {
-      tmp = tmp->suivant;
-      int cmp = _comparer(tmp->val,max);
-      if ( cmp >= 1)
-	max = tmp->val;
-    }
-    return max;
-}
 
-void* rechercher_min_liste(lst l,int(*_comparer)(void* _val1, void* _val2)){
-	 nd tmp = l->tete;
-    void *max = tmp->val;
-    for (int i = 1; i < l->taille; i++) {
-      tmp = tmp->suivant;
-      int cmp = _comparer(tmp->val,max);
-      if ( cmp <= -1)
-	max = tmp->val;
-    }
-    return max;
-}
 
 
 

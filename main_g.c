@@ -1,6 +1,14 @@
-
+//
+//Comme l'arbre peut prendre une valeur de n'importe quel type
+//On définit une structure contenant quelques champs du types primitifs
+//pour ensuit tester le fait d'avoir une fonction du poids et un moyen de composition
+//appliqués aux arbres contenant les élément de notre structure nouvellement crée.
+//
 #include "huffman_g.h"
 #include <time.h>
+
+
+//grrrr
 typedef struct part * dog;
 
 struct part{
@@ -21,6 +29,8 @@ dog creer_dog(int val){
 	d->str[3]='\0';
 	return d;
 }
+//le poids et défini comme étant le rapport entre le nombre d'occurences d'un element et 
+//la taille de l'ensemble d'origine
 
 float poids_dog(void * x,lst ens){
 	dog xdog=(dog)x;
@@ -36,9 +46,10 @@ float poids_dog(void * x,lst ens){
 
 }
 
-
+//Definition du type de groupement
 arb_gen grouper_dog(void * ag, void * ad){
-	//meme si on peut faire ce qu'on veut on utilise l'addition "just because we can". 
+	//meme si on peut definir une fonction quelconque
+	//on utilise l'addition "just because we can". 
 	
 	arb_gen g=(arb_gen)ag;
 	arb_gen d=(arb_gen)ad;
@@ -57,21 +68,23 @@ arb_gen grouper_dog(void * ag, void * ad){
 
 }
 
-
+//Le fait de copier l'adresse 
+//permet d'utiliser efficacement la structure de liste donné
+//sur celene, en la transformant en une file
 void copier_dog(void *val , void **ptr){
 	*ptr=val;
 }
-
+//liberer la memoire d'un pointeur
 void detruire_dog(void **ptr){
 	free(*ptr);
 }
-
+//afficher un element de la structure
 void afficher_dog(void * ptr){
 	if(ptr==NULL)return;
 	dog x=(dog)ptr;
 	printf("%s and %d\n",x->str,x->val1);
 }
-
+//afficher un le contenu d'un arbre contenant notre structure
 void afficher_arb_dog(void * ptr){
 
 	arb_gen x=(arb_gen)ptr;
@@ -84,7 +97,7 @@ void afficher_arb_dog(void * ptr){
 
 
 
-
+//comparer deux elements de notre structure
 int comparer_dog(void * x, void* y){
 	
 	if(x==NULL||y==NULL){
@@ -105,7 +118,8 @@ int comparer_dog(void * x, void* y){
 		
 	return resStringComp;
 }
-	
+
+//comparer deux arbres par leurs poids
 int comparer_arb_dog(void * x, void* y){
 	arb_gen a=(arb_gen)x;
 	arb_gen b=(arb_gen)y;
@@ -120,55 +134,61 @@ int comparer_arb_dog(void * x, void* y){
 
 
 int main(void){
-	
+	//retirer des commentaire pour voir les affichages correspondants
 
-	//creer un ensemble de dogs
-	lst ldog = creer_liste(&copier_dog,&detruire_dog,&afficher_dog);
+	//creer un ensemble de dogs aléatoires (haha)
+	lst ldogs = creer_liste(&copier_dog,&detruire_dog,&afficher_dog);
 	for(int i=0;i<50;i++)
-		ajouter_liste_fin(creer_dog(3),ldog);
-	//afficher_liste(ldog);
-	
+		ajouter_liste_fin(creer_dog(3),ldogs);
+	//afficher_liste(ldogs);
 
 	//calculer les probas en mettant les dogs dans des arbres
 	lst ldogPrim=creer_liste(&copier_dog,&detruire_dog,&afficher_arb_dog);
-
 	for(int j=0;j<50;j++){
-		arb_gen a1=creer_arbre((dog)get_en_i(j,ldog->tete),ldog,&poids_dog,&grouper_dog,
+		arb_gen a1=creer_arbre((dog)get_en_i(j,ldogs->tete),ldogs,&poids_dog,&grouper_dog,
 					&comparer_dog,&copier_dog,&detruire_dog,&afficher_arb_dog);
 		ajouter_liste_fin(a1,ldogPrim);
 	}
-		printf("%d t\n",ldog->taille);
-	lst listePRIM=arbreprimitive(ldogPrim,(arb_gen)get_en_i(0,ldogPrim->tete),&comparer_dog);
+	//afficher_liste(ldogPrim);
 
-		printf("%d t\n",listePRIM->taille);
-	printf("%d indice du min\n",min(listePRIM,&comparer_arb_dog));
+
+	//creer un ensem
+	lst listePRIM=arbreprimitive(ldogPrim,(arb_gen)get_en_i(0,ldogPrim->tete),&comparer_dog);
+	//afficher_liste(listePRIM);
+
 
 	//groupons 
 
-	//elements qui vont servir du test de compression
+	//elements qui vont servir du test de compression(pris a partir de l'ensensemble
+	// d'arbres uniques qui constitueront notre huffman tree)
 	lst elemsACompress = creer_liste(&copier_dog,&detruire_dog,&afficher_arb_dog);
 	for(int i=0;i<10;i++){
 		ajouter_liste_fin((arb_gen)get_en_i(i,listePRIM->tete),elemsACompress);
 	} 
+	printf("Elements qu'on va reconstituer\n");
 	afficher_liste(elemsACompress);
 
-	afficher_liste(listePRIM);
+
+
 	
+	//extraire l'arbre de huffman complet.
 	huffman(&listePRIM,&comparer_arb_dog,&grouper_dog);
 	arb_gen huffman_tree=(arb_gen)get_en_i(0,listePRIM->tete);
-	parcourir_arbre(huffman_tree,&afficher_arb_dog);
 	//parcourir_arbre(huffman_tree,&afficher_arb_dog);
-	//compressons un ensemble d'elements elemACompress;
-	
+
+
+	//compressons un ensemble d'elements "elemACompress";
 	char * resCompress=(char*)malloc(sizeof(char*)*500);
 	resCompress=compresser_ens(huffman_tree,&resCompress,elemsACompress,&comparer_dog);
-	
-	
+	printf("Le code: %s \n",resCompress);
+
+	//decopression et reconstitution de l'ensemble de départ
 	lst ares = decompresser(resCompress,huffman_tree);
+	printf("Elements reconstinues:\n");
 	afficher_liste(ares);
 	//afficher_dog(ares->val);
 	
-	printf("%s",resCompress);
+	
 
 
 return 0;
