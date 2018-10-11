@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "noeud_generique.h"
-#include "liste_generique.h"
+#include "list/noeud_generique.h"
+#include "list/liste_generique.h"
 typedef struct arbre_g * arb_gen;
 
 struct arbre_gen{
@@ -20,8 +20,8 @@ struct arbre_gen{
 
 	//fonction pour pourvoir ajouter un arbre dans la liste;
 	void(*copier)(void*, void**);
-    void(*detruire)(void**);
-    void(*afficher)(void*);
+    	void(*detruire)(void**);
+    	void(*afficher)(void*);
 }
 
 arb_gen creer_arbre (void* val,float (*poids)(void *)); 
