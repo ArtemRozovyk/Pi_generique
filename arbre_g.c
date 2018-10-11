@@ -1,21 +1,47 @@
-#include "arbre.h"
+#include "arbre_g.h"
 
 
-arb_gen creer_arbre (void* val,float (*poids)(void *)){
-
+arb_gen creer_arbre(void* val, lst ens, float (*poids)(void *,lst ens), arb_gen (*grouper)(void *,void*), int (*comparer)(void *,void *), void(*copier)(void*, void**), void(*detruire)(void**), void(*afficher)(void*)){
+//creer un nouveau arbre à partir de 0;
 	arb_gen a=(arb_gen) malloc (sizeof(struct arbre_gen));
 	a->val = val; 
 	a->ng = NULL; 
 	a->nd = NULL;
-	a->p = poids(val); 
+	a->p = poids(val,ens);
+	a->poids=poids;
+	a->grouper=grouper;
+	a->comparer=comparer;
+	a->copier=copier;
+	a->detruire=detruire;
+	a->afficher=afficher; 
 	return a; 
 }
 
+
+arb_gen creer_arbre1(void* val, lst ens, arb_gen pere){
+	return (creer_arbre(val,ens,pere->poids,pere->grouper,pere->comparer,pere->copier,pere->detruire,pere->afficher));
 }
 
+arb_gen creer_arbre2(arb_gen p){
+	//creer arbre a partir d'un arbre
+	arb_gen a=(arb_gen) malloc (sizeof(struct arbre_gen));
+	a->val = p->val; 
+	a->ng = NULL; 
+	a->nd = NULL;
+	a->p = p->p;
+	a->poids=p->poids;
+	a->grouper=p->grouper;
+	a->comparer=p->comparer;
+	a->copier=p->copier;
+	a->detruire=p->detruire;
+	a->afficher=p->afficher;
+	return a;
+	
+	
+}
 
 void ajouter_noeud (arb_gen * ajout, arb_gen a){
-	lst queue=creer_liste(a->copier,a->afficher,a->detrure);
+	lst queue=creer_liste(a->copier,a->detruire,a->afficher);
 	ajouter_noeud_aux(ajout,a,queue);
 }
 
@@ -24,12 +50,12 @@ void ajouter_noeud_aux(arb_gen * ajout, arb_gen a, lst queue){
 	if(*ajout==NULL)
 		return ;
 	if(a->ng==NULL){
-		a->ng=creer_arbre((*ajout)->val,(*ajout)->poids);
+		a->ng=creer_arbre2(*ajout);
 		(*ajout)=NULL;
 		return;
 	}
 	if(a->nd==NULL){
-		a->nd=creer_arbre((*ajout)->val,(*ajout)->poids);
+		a->nd=creer_arbre2(*ajout);
 		(*ajout)=NULL;
 		return;
 	}
@@ -42,25 +68,26 @@ void ajouter_noeud_aux(arb_gen * ajout, arb_gen a, lst queue){
 	return;
 }
 
-void parcourir_arbre(arb_gen a){
-	lst queue=creer_liste(a->copier,a->detruire,a->afficher);
-	parcourir_arbre_aux(a,queue);
+void parcourir_arbre(arb_gen a, void(*afficher)(void*)){
+	lst queue=creer_liste(a->copier,a->detruire,afficher);
+	parcourir_arbre_aux(a,queue,afficher);
 }
 
-void parcourir_arbre_aux(arb_val a,lst queue){
+void parcourir_arbre_aux(arb_gen a,lst queue, void(*afficher)(void*)){
 	if(a==NULL)return;
-	a->afficher(a->val);
+	//printf("%f",a->p);
+	afficher(a);
 	ajouter_liste_fin(a->ng,queue);
 	ajouter_liste_fin(a->nd,queue);
 	while(queue->taille){
 		arb_gen desc=(arb_gen)supprimer_en_I(0,&queue);
-		parcourir_arbre_aux(desc,queue);
+		parcourir_arbre_aux(desc,queue,afficher);
 	}
 }
 
 void supprimer_nd_arbre(arb_gen a){
 	lst queue=creer_liste(a->copier,a->detruire,a->afficher);
-	arb_gen as=(arb_gen)malloc(sizeof(struct arbre));
+	arb_gen as=(arb_gen)malloc(sizeof(struct arbre_gen));
 	supprimer_nd_aux(a,queue,&as);
 	supprimer_nd_aux2(a,as);
 	free(as);
@@ -91,9 +118,9 @@ void supprimer_nd_aux2(arb_gen a, arb_gen as){
 
 void detruire_arbre(arb_gen * d){
 	if((*d)==NULL)return;
-		d->detruire(&(*d)->nd);
-		d->detruire_arbre(&(*d)->ng);
-	printf("on va liberer pointeur de %c\n",(*d)->c);
+		detruire_arbre(&(*d)->nd);
+		detruire_arbre(&(*d)->ng);
+	printf("on va liberer %p\n",(void*)*d);
 	free(*d);
 }
 

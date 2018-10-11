@@ -100,7 +100,7 @@ void * supprimer_en_I(int i,lst *l){
 void * get_en_i(int i, nd n){
 	nd tmp = n;
 	while(i--){
-	tmp=tmp->suivant;
+		tmp=tmp->suivant;
 	}
 	return tmp->val;
 
